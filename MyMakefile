@@ -4,9 +4,7 @@ CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 OD=bin
 
-SRCFILE=src/main.c
-
-OBJ=
+OBJ=src/main.o src/display.o
 
 SFLAGS= --static -nostartfiles -std=c11 -g3 -Os
 SFLAGS+= -fno-common -ffunction-sections -fdata-sections
@@ -21,17 +19,12 @@ all: $(OBJ)
 	# $(MAKE) -C libopencm3
 	mkdir -p $(OD)
 	
-	$(CC) $(SRCFILE) $(STM32F1_CFLAGS) -o $(OD)/firmware.elf
+	$(CC) $(OBJ) $(STM32F1_CFLAGS) -o $(OD)/firmware.elf
 	$(OBJCOPY) -Obinary $(OD)/firmware.elf $(OD)/firmware.bin
 	$(OBJCOPY) -Oihex $(OD)/firmware.elf $(OD)/firmware.hex
 
 clean:
 	$(RM) $(BOARDS_ELF) $(BOARDS_BIN) $(BOARDS_HEX)
-
-CFLAGS		+= -Os -g
-CFLAGS		+= -Wextra -Wshadow -Wimplicit-function-declaration
-CFLAGS		+= -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes
-CFLAGS		+= -fno-common -ffunction-sections -fdata-sections
 
 %.o: %.c
 	$(CC) -c $(STM32F1_CFLAGS) $(*).c -o $(*).o 
