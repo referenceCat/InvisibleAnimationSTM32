@@ -18,6 +18,7 @@ void clockSetup() {
   	rcc_periph_clock_enable(RCC_GPIOB);
   	rcc_periph_clock_enable(RCC_AFIO);
   	rcc_periph_clock_enable(RCC_I2C1);
+	rcc_periph_clock_enable(RCC_GPIOC);
 }
 
 void applyScreenMask() {
@@ -26,8 +27,14 @@ void applyScreenMask() {
 	}
 }
 
+static void button_setup(void) {
+	gpio_set_mode(GPIOC, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO13);
+	gpio_set(GPIOC, GPIO13);
+}
+
 int main() {
 	clockSetup();
+	button_setup();
 	i2c_init();
 	for (int i = 0; i < BUFFERLENGTH; i++) {
 		screenBuffer[i] = rand();
@@ -36,8 +43,11 @@ int main() {
 
 	ssd1306_start();
 	while (1) {
-		applyScreenMask();
-		ssd1306_refresh(screenBuffer, BUFFERLENGTH);
+		if (gpio_get(GPIOC, GPIO13)) {
+			applyScreenMask();
+			ssd1306_refresh(screenBuffer, BUFFERLENGTH);
+		}
+		
 	}
 	ssd1306_stop();
 
