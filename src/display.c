@@ -391,7 +391,7 @@ void ssd1306_clear(uint8_t *screenBuffer, int screenBufferSize) {
 void ssd1306_refresh(uint8_t *screenBuffer, int screenBufferSize) {
   ssd1306_start();
   ssd1306_send(DATAONLY);
-  for (uint16_t i=0; i < screenBufferSize; i++) {
+  for (uint16_t i = 0; i < screenBufferSize; i++) {
     i2c_send_data(I2C1, screenBuffer[i]); //todo make it with DMA later
     while (_IF_TxE(I2C1));
   }
