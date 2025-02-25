@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/bin/firmware.elf",
+            "name": "STM32 OpenOCD",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "build",
+            "preLaunchCommands": [],
+            "postLaunchCommands": [],
+            "device": "STM32F103xB",
+            "svdFile": "STM32F103.svd",
+            "configFiles": [
+                "/usr/share/openocd/scripts/board/st_nucleo_f103rb.cfg"
+            ],
+            "showDevDebugOutput": "none",
+            "internalConsoleOptions": "openOnSessionStart",
+        }
+    ]
+}

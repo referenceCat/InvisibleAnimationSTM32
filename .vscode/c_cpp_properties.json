@@ -1,0 +1,23 @@
+{
+    "env": {
+        "stm32.family": "STM32F1",
+        "stm32.cpu": "STM32F103xB"
+    },
+    "configurations": [
+        {
+            "name": "openocd debug",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "${stm32.cpu}",
+                "${stm32.family}"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
