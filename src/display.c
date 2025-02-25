@@ -1,11 +1,6 @@
 #include "display.h"
 
 void i2c_init(void) {
-  rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
-  rcc_periph_clock_enable(RCC_GPIOB);
-  rcc_periph_clock_enable(RCC_AFIO);
-  rcc_periph_clock_enable(RCC_I2C1);
-
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO8);
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO9);
   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_I2C1_REMAP);
