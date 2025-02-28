@@ -1,32 +1,20 @@
 #include "display.h"
 
 void i2c_init(void) {
+  dma_channel_reset(DMA1, DMA_CHANNEL6);
+  dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL6);
+  dma_set_read_from_memory(DMA1, DMA_CHANNEL6);
+  dma_disable_transfer_error_interrupt(DMA1, DMA_CHANNEL6);
+  dma_set_peripheral_address(DMA1, DMA_CHANNEL6, (uint32_t)&I2C1_DR);
+
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO8);
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO9);
   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_I2C1_REMAP);
 
   i2c_peripheral_disable(I2C1);
-  i2c_set_clock_frequency(I2C1, 36);
-  i2c_set_fast_mode(I2C1);
-
-  /*
-	 * fclock for I2C is 36MHz APB2 -> cycle time 28ns, low time at 400kHz
-	 * incl trise -> Thigh = 1600ns; CCR = tlow/tcycle = 0x1C,9;
-	 * Datasheet suggests 0x1e.
-	 */
-  i2c_set_ccr(I2C1, 0x1e);
-
-  /*
-   * fclock for I2C is 36MHz -> cycle time 28ns, rise time for
-   * 400kHz => 300ns and 100kHz => 1000ns; 300ns/28ns = 10;
-   * Incremented by 1 -> 11.
-   */
-  i2c_set_trise(I2C1, 0x0b);
-
-  /*
-   * Enable ACK on I2C
-   */
-  i2c_enable_ack(I2C1);
+  i2c_enable_dma(I2C1);
+  i2c_set_own_7bit_slave_address(I2C1, 0x00);
+  i2c_set_speed(I2C1, i2c_speed_sm_100k, rcc_apb1_frequency/1000000);
   i2c_peripheral_enable(I2C1);
 }
 
@@ -84,8 +72,7 @@ void ssd1306_start(void) {
   i2c_send_start(I2C1);
   while (_IF_SB(I2C1));
   i2c_send_7bit_address(I2C1, OLED_ADDRESS, I2C_WRITE);
-  while (_IF_ADDR(I2C1))
-    ;
+  while (_IF_ADDR(I2C1));
   /* Cleaning ADDR condition sequence. */
   reg32 = I2C_SR2(I2C1);
 }
@@ -373,13 +360,6 @@ void ssd1306_setColumn(uint8_t column) {
   ssd1306_send_data(COMMAND, cmd);
 }
 
-void ssd1306_clear(uint8_t *screenBuffer, int screenBufferSize) {
-  for (uint16_t i = 0; i < screenBufferSize; i++)
-    screenBuffer[i] = 0;
-
-  ssd1306_refresh(screenBuffer, screenBufferSize);
-}
-
 /**
  * Send (and display if OLED is ON) RAM buffer to device
  */
@@ -388,6 +368,16 @@ void ssd1306_refresh(uint8_t *screenBuffer, int screenBufferSize) {
   ssd1306_send(DATAONLY);
   for (uint16_t i = 0; i < screenBufferSize; i++) {
     i2c_send_data(I2C1, screenBuffer[i]); //todo make it with DMA later
+    while (_IF_TxE(I2C1));
+  }
+  ssd1306_stop();
+}
+
+void ssd1306_clear(int screenBufferSize) {
+  ssd1306_start();
+  ssd1306_send(DATAONLY);
+  for (uint16_t i = 0; i < screenBufferSize; i++) {
+    i2c_send_data(I2C1, 0x00); //todo make it with DMA later
     while (_IF_TxE(I2C1));
   }
   ssd1306_stop();

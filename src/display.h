@@ -4,6 +4,7 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/f1/gpio.h>
 #include <stdlib.h>
+#include <libopencm3/stm32/dma.h>
 
 #ifndef SRC_DISPLAY_H
     #define SRC_DISPLAY_H
@@ -16,6 +17,8 @@
 #define _IF_BTF(i2c) ((I2C_SR1(i2c) & I2C_SR1_BTF) == 0)
 #define _IF_ADDR(i2c) ((I2C_SR1(i2c) & I2C_SR1_ADDR) == 0)
 #define _IF_TxE(i2c) (I2C_SR1(i2c) & I2C_SR1_TxE) == 0
+#define IS_SET(a, b)  (((a) & (b)) != 0)
+#define NOT_SET(a, b) (!IS_SET(a, b))
 #define BUFFERLENGTH 1024
 #define DATAONLY (uint8_t)0b01000000
 #define COMMAND (uint8_t)0b00000000
@@ -63,7 +66,7 @@ void ssd1306_setMultiplexRatio(uint8_t ratio);
 void ssd1306_setCOMPinsHardwareConfiguration(uint8_t val);
 void ssd1306_setPage(uint8_t page);
 void ssd1306_setColumn(uint8_t column);
-void ssd1306_clear(uint8_t *screenBuffer, int screenBufferSize);
+void ssd1306_clear(int screenBufferSize);
 void ssd1306_refresh(uint8_t *screenBuffer, int screenBufferSize);
 
 #endif
