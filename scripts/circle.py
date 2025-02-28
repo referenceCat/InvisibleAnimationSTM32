@@ -1,24 +1,32 @@
-screen = [[0 for x in range(128) ] for y in range(64)]
+import math
 
-for x in range(128):
-    for y in range(64):
-        if (x - 64) ** 2 + (y - 32) ** 2 < 400:
-            screen[y][x] = 1
-            print(y,x)
+width = 128
+height = 64
+frames = 10
+screen = [[0 for x in range(width) ] for y in range(height * frames)]
 
+for frame in range(frames):
+    for x in range(width):
+        for y in range(height):
+            if (x - width // 2) ** 2 + (y - height // 2) ** 2 < (100 + 5 * 140 * math.sin((frame / 9) * 3.14)):
+                screen[y + frame * height][x] = 1
 
-for i in range(64):
-    for j in range(128):
-        print(int(screen[i][j]), end="")
-    
+           
+for frame in range(frames):
+    for i in range(height):
+        for j in range(width):
+            print(int(screen[i + frame * height][j]), end="")
+        print()
     print()
 
-with open("scripts/circle.txt", "w") as file:
-    for i in range(8):
-        for j in range(128):
-            byte = 0
-            for z in range(8):
-                byte += screen[(i % 4) * 16 + int(i > 3) + z * 2][j] * 2 ** z
-            print(hex(byte), end=", ", file=file)
+with open("scripts/circle2.txt", "w") as file:
+    for frame in range(frames):
+        for i in range(height // 8):
+            for j in range(width):
+                byte = 0
+                for z in range(8):
+                    byte += screen[(i % 4) * 16 + int(i > 3) + z * 2 + frame * height][j] * 2 ** z
+                print(hex(byte), end=", ", file=file)
         
+            print(file=file)
         print(file=file)
